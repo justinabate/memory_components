@@ -1,0 +1,34 @@
+#!/bin/sh
+# 
+# Ensure SVunit and modelsim/questa are in $PATH
+# $ which runSVUnit
+#   /opt/svunit-3.34.2/bin/runSVUnit
+# 
+# $ which vsim
+#   /opt/altera/20.1/modelsim_ase/linuxaloem/vsim
+#
+# Note: if using questa, change "-s" option to questa
+# 
+# Refs: 
+#  https://groups.google.com/g/svunit-user-group/c/Z1h3yTTczek/m/17WEykqXBQAJ
+#  http://agilesoc.com/open-source-projects/svunit/svunit-user-guide/#Writing_Unit_Tests
+#
+
+rm -f *.log
+
+mkdir -p libraries
+mkdir -p libraries/work
+
+runSVUnit \
+-t ../../hdl/beh/fifo_sync_sram_based_unit_test.sv \
+-s modelsim \
+-l transcript.log \
+-r -voptargs=+acc \
+-f ./includes/setup_svu.txt \
+-r "-do ./includes/setup_vsim.do" \
+-r -gui 
+
+cleanSVUnit
+rm -r libraries/
+rm -f tests.xml
+rm -f transcript.log

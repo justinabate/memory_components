@@ -1,0 +1,7 @@
+# $PWD is ~/sim/svunit
++incdir+./../../hdl/rtl/.
++incdir+./../../hdl/beh/.
++incdir+./../../hdl/pkg/.
+# +incdir+/home/u0/Workspace/fpga/github_repos/justinabate/memory_components/hdl/rtl/.
+# +incdir+/home/u0/Workspace/fpga/github_repos/justinabate/memory_components/hdl/beh/.
+# +incdir+/home/u0/Workspace/fpga/github_repos/justinabate/memory_components/hdl/pkg/.
