@@ -26,7 +26,9 @@ runSVUnit \
 -r -voptargs=+acc \
 -f ./includes/setup_svu.txt \
 -r "-do ./includes/setup_vsim.do" \
--r -gui 
+-r -gui \
+# --filter fifo_sync_sram_based_ut.test_write
+
 
 cleanSVUnit
 rm -r libraries/
