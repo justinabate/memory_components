@@ -23,7 +23,8 @@ runSVUnit \
 -t ../../hdl/beh/fifo_sync_sram_based_unit_test.sv \
 -s modelsim \
 -f ./includes/setup_svu.txt \
--l transcript.log 
+-l transcript.log \
+# --filter fifo_sync_sram_based_ut.test_write
 
 cleanSVUnit
 rm -r libraries/
