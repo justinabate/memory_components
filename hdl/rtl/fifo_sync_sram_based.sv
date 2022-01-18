@@ -25,7 +25,7 @@ fifo_sync_sram_based #(
   .g_W( 32 )
 ) i_fifo (
   .i_clk( i_clk ),
-  .i_rst_n( 1'b1 ),
+  .i_srst_n( 1'b1 ),
   .i_wena(  ),
   .i_wdat(  ),
   .o_werr(  ),
@@ -46,7 +46,7 @@ module fifo_sync_sram_based #(
                                     
 
   parameter g_D = 512,                // fifo word depth; power of 2
-  parameter g_W = 32,                 // fifo word width
+  parameter g_W = 72,                 // fifo word width
 
   parameter g_D_size = $clog2(g_D)+1  // elements counter width, extra bit to store
                                       // "fifo full" state, see o_flvl[] variable comments
@@ -54,7 +54,7 @@ module fifo_sync_sram_based #(
 )(
 
   input                       i_clk,
-  input                       i_rst_n, // inverted reset
+  input                       i_srst_n, // inverted reset
 
   // write port           
   input                       i_wena,
@@ -121,7 +121,7 @@ endfunction
 
 
 always_ff @(posedge i_clk) begin
-  if ( ~i_rst_n ) begin
+  if ( ~i_srst_n ) begin
     w_ptr[g_D_size-1:0] <= '0;
     r_ptr[g_D_size-1:0] <= '0;
 

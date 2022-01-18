@@ -1,5 +1,6 @@
 //! File list for SVunit
 `include "svunit_defines.svh"
+`include "fifo_sync.sv"
 `include "fifo_sync_sram_based.sv"
 `include "sram_tp_true.sv"
 
@@ -11,18 +12,13 @@ module fifo_sync_sram_based_unit_test;
   string name = "fifo_sync_sram_based_ut";
   svunit_testcase svunit_ut;
 
-
-  // Parameters, regs, wires
-  parameter CLK_HALF_PER = 6.4/2; // 156.25 MHz 
-
-  parameter g_D = 512; // FIFO depth
-  parameter g_W = 32; // input word size 
+  parameter               CLK_HALF_PER = 6.4/2; // 156.25 MHz               
+  parameter               g_D = 256; // FIFO depth
+  parameter               g_W = 32; // input word size 
   
-  // Clock and Reset signals
   reg                     w_rst_n = 1'b1; // init to high
   reg                     w_clk = 1'b0;
 
-  // wires to/from DUT
   logic [g_W-1:0]         w_wdat = '0;
   logic [g_W-1:0]         w_rdat;
 
@@ -32,54 +28,59 @@ module fifo_sync_sram_based_unit_test;
   logic [$clog2(g_D)-0:0] w_flvl;
     
 
-  //===================================
-  // This is the UUT that we're running the Unit Tests on
-  //===================================
+  fifo_sync #(
+    .g_D( g_D ),
+    .g_W( g_W )
+  ) i_fifo_fwft (
+    .i_clk   ( w_clk ),
+    .i_arst_n( w_rst_n ),
+    .i_sclr  (1'b0),
+
+    .i_wena  ( w_wena ),
+    .i_wdat  ( w_wdat ),
+  
+    .i_rena  ( w_rena ),
+    .o_rdat  ( w_rdat ),
+  
+    .o_full  ( w_full ),
+    .o_empt  ( w_empt ),
+    .o_flvl  ( w_flvl ) 
+  );
+
 
   fifo_sync_sram_based #(
     .g_D( g_D ),
     .g_W( g_W )
-  ) i_fifo (
-    .i_clk  ( w_clk ),
-    .i_rst_n( w_rst_n ),
+  ) i_fifo_basic (
+    .i_clk   ( w_clk ),
+    .i_srst_n( w_rst_n ),
 
-    .i_wena( w_wena ),
-    .i_wdat( w_wdat ),
-    .o_werr( w_werr ),
-
-    .i_rena( w_rena ),
-    .o_rdat( w_rdat ),
-    .o_rerr( w_rerr ),
-
-    .o_full( w_full ),
-    .o_empt( w_empt ),
-    .o_flvl( w_flvl ) 
+    .i_wena  ( w_wena ),
+    .i_wdat  ( w_wdat ),
+    .o_werr  (  ),
+  
+    .i_rena  ( w_rena ),
+    .o_rdat  (  ),
+    .o_rerr  (  ),
+  
+    .o_full  (  ),
+    .o_empt  (  ),
+    .o_flvl  (  ) 
   );
 
-  //===================================
-  // BFMs, monitors
-  //===================================
 
-
-  //===================================
-  // SVunit tasks
-  //===================================
   function void build();
     svunit_ut = new(name);
   endfunction
 
   task setup();
     svunit_ut.setup(); // Setup for running the Unit Tests
-
   endtask
 
   task teardown();
     svunit_ut.teardown(); // deconstruct anything we need after running the Unit Tests
   endtask
 
-  //===================================
-  // Custom tasks
-  //===================================
   task t_reset();
     @(posedge w_clk);
       w_rst_n = ~w_rst_n;
@@ -87,9 +88,8 @@ module fifo_sync_sram_based_unit_test;
       w_rst_n = ~w_rst_n;
   endtask
 
-
-  //! clock driver
-  always #(CLK_HALF_PER) w_clk = ~w_clk;
+  
+  always #(CLK_HALF_PER) w_clk = ~w_clk; //! clock driver
 
 
 
@@ -132,6 +132,27 @@ module fifo_sync_sram_based_unit_test;
   `SVTEST_END
   $display(" ");
 
+
+  `SVTEST(test_read) 
+    $display("INFO:  Reading a single data word to the FIFO");
+
+		while (w_empt) @(posedge w_clk); //! wait until empty goes low
+    
+    @(posedge w_clk);
+    w_rena = 1'b1; //! drive a read enable on the next clock
+    @(posedge w_clk);
+    w_rena = 1'b0; //! deassert read enable
+
+    //! check results
+    repeat (1) @(posedge w_clk);
+		`FAIL_IF(w_empt == 1'b0); //! FIFO empty must deassert on next cycle
+    $display("PASS:  Empty signal deasserted successfully");
+		`FAIL_IF(w_flvl == 1); //! fill level must change from zero
+    $display("PASS:  Fill level succesfully changed");
+    repeat (10) @(posedge w_clk);
+
+  `SVTEST_END
+  $display(" ");
 
   // `SVTEST(test_concurrent) 
   //   $display("INFO:  ");
