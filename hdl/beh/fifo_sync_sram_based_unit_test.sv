@@ -13,24 +13,24 @@ module fifo_sync_sram_based_unit_test;
   svunit_testcase svunit_ut;
 
   parameter               CLK_HALF_PER = 6.4/2; // 156.25 MHz               
-  parameter               g_D = 256; // FIFO depth
-  parameter               g_W = 32; // input word size 
+  parameter int G_D = 256; // FIFO depth
+  parameter int G_W = 32; // input word size 
   
   reg                     w_rst_n = 1'b1; // init to high
   reg                     w_clk = 1'b0;
 
-  logic [g_W-1:0]         w_wdat = '0;
-  logic [g_W-1:0]         w_rdat;
+  logic [G_W-1:0]         w_wdat = '0;
+  logic [G_W-1:0]         w_rdat;
 
   logic                   w_wena = '0;
   logic                   w_rena = '0;
   logic                   w_full, w_empt, w_werr, w_rerr;
-  logic [$clog2(g_D)-0:0] w_flvl;
+  logic [$clog2(G_D)-0:0] w_flvl;
     
 
   fifo_sync #(
-    .g_D( g_D ),
-    .g_W( g_W )
+    .G_D( G_D ),
+    .G_W( G_W )
   ) i_fifo_fwft (
     .i_clk   ( w_clk ),
     .i_arst_n( w_rst_n ),
@@ -49,8 +49,8 @@ module fifo_sync_sram_based_unit_test;
 
 
   fifo_sync_sram_based #(
-    .g_D( g_D ),
-    .g_W( g_W )
+    .G_D( G_D ),
+    .G_W( G_W )
   ) i_fifo_basic (
     .i_clk   ( w_clk ),
     .i_srst_n( w_rst_n ),
